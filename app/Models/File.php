@@ -17,4 +17,8 @@ class File extends Model
     protected $attributes = [
         'labels' => [],
     ];
+
+    public function owner() {
+        return $this->belongsTo(User::class);
+    }
 }

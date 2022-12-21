@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Folder\CreateRequest;
+use App\Http\Requests\Folder\UpdateRequest;
 use App\Models\Folder;
-use Illuminate\Http\Request;
 
 class FolderController extends Controller
 {
@@ -33,7 +34,7 @@ class FolderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateRequest $request)
     {
         //
     }
@@ -67,7 +68,7 @@ class FolderController extends Controller
      * @param  \App\Models\Folder  $folder
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Folder $folder)
+    public function update(UpdateRequest $request, Folder $folder)
     {
         //
     }

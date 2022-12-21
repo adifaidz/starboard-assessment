@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('folders', function (Blueprint $table) {
             $table->uuid('id');
             $table->string('name');
-            $table->uuid('parentId')->nullable();
+            $table->foreignUuid('parentId')->references('id')->on('folders');
             $table->foreign('owned_by')->references('id')->on('users');
             $table->timestamps();
         });

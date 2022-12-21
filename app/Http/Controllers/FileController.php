@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\File\CreateRequest;
+use App\Http\Requests\File\UpdateRequest;
 use App\Models\File;
-use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
@@ -33,7 +34,7 @@ class FileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateRequest $request)
     {
         //
     }
@@ -67,7 +68,7 @@ class FileController extends Controller
      * @param  \App\Models\File  $file
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, File $file)
+    public function update(UpdateRequest $request, File $file)
     {
         //
     }
