@@ -9,21 +9,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class Folder extends Model
 {
-    use HasFactory, HasUuids;
+  use HasFactory, HasUuids;
 
+  protected $fillable = ['name', 'parent_id', 'owned_by'];
 
-    public function owner() {
-        return $this->belongsTo(User::class);
-    }
+  public function owner() {
+    return $this->belongsTo(User::class);
+  }
 
-    public function parent() {
-        return $this->belongsTo(Folder::class, 'parentId');
-    }
+  public function parent() {
+    return $this->belongsTo(Folder::class, 'parent_id');
+  }
 
-    public function path(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->parent ? $this->parent->path . '/' . $this->id : $this->id,
-        );
-    }
+  public function children() {
+    return $this->hasMany(Folder::class, 'parent_id');
+  }
+
+  public function nodes() {
+    return $this->children()->with('nodes');
+  }
+
+  public function path(): Attribute
+  {
+    return new Attribute(
+      get: fn () => $this->parent ? $this->parent->path . '/' . $this->name : $this->name,
+    );
+  }
 }

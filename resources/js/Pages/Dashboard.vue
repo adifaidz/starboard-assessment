@@ -1,6 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/inertia-vue3";
+import Sidebar from "@/Components/SideBar.vue";
+import FileList from "@/Components/FileList.vue";
+import UploadFileButton from "@/Components/UploadFileButton.vue";
+import AddFolderButton from "@/Components/AddFolderButton.vue";
+import { Head, usePage } from "@inertiajs/inertia-vue3";
+import { ref } from "vue";
+import { AppFile, AppFolder } from "@/interface";
+
+const files = ref(usePage().props.value.files as AppFile[]);
+const folderNodes = ref(usePage().props.value.folderNodes as AppFolder[]);
 </script>
 
 <template>
@@ -15,15 +24,14 @@ import { Head } from "@inertiajs/inertia-vue3";
       </h2>
     </template>
 
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div
-          class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-        >
-          <div class="p-6 text-gray-900 dark:text-gray-100">
-            You're logged in!
-          </div>
-        </div>
+    <div class="flex flex-col py-12 max-w-full mx-auto sm:px-6 lg:px-12">
+      <div class="flex self-end">
+        <UploadFileButton />
+        <AddFolderButton />
+      </div>
+      <div class="flex gap-6">
+        <Sidebar :folders="folderNodes" class="w-3/12" />
+        <FileList :files="files" class="w-9/12" />
       </div>
     </div>
   </AuthenticatedLayout>

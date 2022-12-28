@@ -14,11 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('files', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->string('name');
-            $table->foreignUuid('parentId')->references('id')->on('folders');
+            $table->string('hashed_name');
             $table->json('labels');
-            $table->foreign('owned_by')->references('id')->on('users');
+            $table->foreignUuid('parent_id')->nullable()->references('id')->on('folders');
+            $table->foreignId('owned_by')->references('id')->on('users');
             $table->timestamps();
         });
     }

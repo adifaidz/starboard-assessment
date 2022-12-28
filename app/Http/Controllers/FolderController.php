@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Folder\CreateRequest;
 use App\Http\Requests\Folder\UpdateRequest;
 use App\Models\Folder;
+use Illuminate\Support\Facades\Auth;
 
 class FolderController extends Controller
 {
@@ -36,7 +37,11 @@ class FolderController extends Controller
      */
     public function store(CreateRequest $request)
     {
-        //
+      Folder::create([
+        'name' => $request->name,
+        'parent_id' => $request->parentId,
+        'owned_by' => Auth::user()->id,
+      ]);
     }
 
     /**

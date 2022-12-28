@@ -14,11 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('folders', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->string('name');
-            $table->foreignUuid('parentId')->references('id')->on('folders');
-            $table->foreign('owned_by')->references('id')->on('users');
+            $table->uuid('parent_id')->nullable();
+            $table->foreignId('owned_by')->references('id')->on('users');
             $table->timestamps();
+        });
+
+        Schema::table('folders', function (Blueprint $table) {
+          $table->foreign('parent_id')->references('id')->on('folders')->onDelete('cascade');
         });
     }
 

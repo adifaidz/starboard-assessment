@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\File\CreateRequest;
 use App\Http\Requests\File\UpdateRequest;
 use App\Models\File;
+use App\Models\Folder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 
 class FileController extends Controller
 {
@@ -34,9 +39,20 @@ class FileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateRequest $request)
+    public function store(CreateRequest $request, Folder $folder = null)
     {
-        //
+      $uploadedFiles = $request->file('files');
+
+      foreach ($uploadedFiles as $uploadedFile) {
+        $file = File::create([
+          'name' => $uploadedFile->getClientOriginalName(),
+          'owned_by' => Auth::user()->id,
+          'hashed_name' => $uploadedFile->hashName(),
+          'parent_id' => optional($folder)->id,
+        ]);
+
+        $uploadedFile->storeAs(Auth::user()->id, $file->hashed_name);
+      }
     }
 
     /**
