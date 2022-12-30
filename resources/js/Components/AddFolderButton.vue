@@ -1,29 +1,43 @@
 <script setup lang="ts">
-import { useForm } from "@inertiajs/inertia-vue3";
+import { useForm, usePage } from "@inertiajs/inertia-vue3";
 import Modal from "@/Components/Ui/Modal.vue";
 import InputError from "@/Components/Ui/InputError.vue";
 import InputLabel from "@/Components/Ui/InputLabel.vue";
 import TextInput from "@/Components/Ui/TextInput.vue";
 import SecondaryButton from "@/Components/Ui/SecondaryButton.vue";
 import PrimaryButton from "@/Components/Ui/PrimaryButton.vue";
+import { Inertia, Method } from "@inertiajs/inertia";
 import { ref } from "vue";
+import route from "@/../../vendor/tightenco/ziggy/src/js";
 
 const props = defineProps({
   parentId: String,
 });
 
+const pageFolderId = usePage().props.value.folderId;
 const isModalOpen = ref(false);
 const nameInput = ref(null);
 
 const form = useForm({
   name: null as string,
-  parentId: props.parentId as string,
+  parentId: pageFolderId as string,
 });
 
-const submit = () => {
-  form.post(route("folders.store"), {
+const partialReload = () => {
+  Inertia.visit(route("app.dashboard", { folder: pageFolderId }) as string, {
+    method: Method.GET,
     preserveScroll: true,
-    onSuccess: () => closeModal(),
+    only: ["folders", "files"],
+  });
+};
+
+const submit = () => {
+  form.post(route("app.folders.store") as string, {
+    preserveScroll: true,
+    onSuccess: () => {
+      closeModal();
+      partialReload();
+    },
     onError: () => nameInput.value.focus(),
     onFinish: () => form.reset(),
   });

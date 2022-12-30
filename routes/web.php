@@ -28,17 +28,17 @@ Route::get('/', function () {
     ]);
 });
 
-Route::prefix('app')->group(function() {
+Route::group(['prefix' => 'app', 'middleware' => ['auth', 'verified']],function() {
   Route::get('/{folder?}', [AppController::class, 'index'])->name('app.dashboard');
 
-  Route::post('/{folder?}', [FolderController::class, 'store'])->name('app.folders.store');
-  Route::put('/{folder?}', [FolderController::class, 'update'])->name('app.folders.update');
-  Route::delete('/{folder?}', [FolderController::class, 'destroy'])->name('app.folders.destroy');
+  Route::post('/folders', [FolderController::class, 'store'])->name('app.folders.store');
+  Route::put('/folders', [FolderController::class, 'update'])->name('app.folders.update');
+  Route::delete('/folders', [FolderController::class, 'destroy'])->name('app.folders.destroy');
 
   Route::post('/{folder?}/files', [FileController::class, 'store'])->name('app.files.store');
-  Route::put('/{folder?}/files', [FileController::class, 'update'])->name('app.files.update');
-  Route::delete('/{folder?}/files', [FileController::class, 'destroy'])->name('app.files.destroy');
-})->middleware(['auth', 'verified']);
+  Route::put('/files/{file}', [FileController::class, 'update'])->name('app.files.update');
+  Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('app.files.destroy');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

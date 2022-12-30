@@ -25,7 +25,7 @@ class AppController extends Controller
         return Inertia::render('Dashboard', [
           'folderNodes' => $folderNodes,
           'files' => $files,
-          'currentFolderId' => $folder ? $folder->id : $rootFolder-> id,
+          'folderId' => $folder ? $folder->id : $rootFolder-> id,
         ]);
     }
 }

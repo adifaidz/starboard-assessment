@@ -96,7 +96,8 @@ class FileController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(File $file)
-    {
-        //
+    {;
+        $file->delete();
+        Storage::disk('local')->delete(Auth::user()->id . '/' .$file->hashed_name);
     }
 }

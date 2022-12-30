@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { useForm, usePage } from "@inertiajs/inertia-vue3";
 import { Inertia, Method } from "@inertiajs/inertia";
+import route from "@/../../vendor/tightenco/ziggy/src/js";
 
-const currentFolderId = usePage().props.value.currentFolderId;
+const pageFolderId = usePage().props.value.folderId;
 const form = useForm({
   files: [] as File[],
 });
 
 const submit = () => {
-  form.post(route("app.files.store", { folder: currentFolderId }), {
+  form.post(route("app.files.store", { folder: pageFolderId }) as string, {
     preserveScroll: true,
     onSuccess: () =>
-      Inertia.visit(route("app.dashboard", { folder: currentFolderId }), {
-        method: Method.GET,
-        preserveScroll: true,
-        only: ["folders", "files"],
-      }),
+      Inertia.visit(
+        route("app.dashboard", { folder: pageFolderId }) as string,
+        {
+          method: Method.GET,
+          preserveScroll: true,
+          only: ["folders", "files"],
+        }
+      ),
   });
 };
 </script>

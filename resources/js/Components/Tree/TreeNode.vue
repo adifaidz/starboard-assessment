@@ -2,17 +2,18 @@
 import { TreeNode as TreeNodeType } from "@/interface";
 import { PropType, ref } from "vue";
 import { Inertia, Method } from "@inertiajs/inertia";
+import { usePage } from "@inertiajs/inertia-vue3";
+import route from "@/../../vendor/tightenco/ziggy/src/js";
 
+const pageFolderId = usePage().props.value.folderId as string;
 const props = defineProps({
   parentId: String,
   node: Object as PropType<TreeNodeType>,
 });
-
 const emit = defineEmits(["nodeExpanded"]);
 
-const isExpanded = ref(
-  route().current("app.dashboard", { folder: props.node.id }) as boolean
-);
+const isCurrentFolder = pageFolderId === props.node.id;
+const isExpanded = ref(isCurrentFolder);
 
 if (isExpanded.value) {
   emit("nodeExpanded", props.node);
@@ -24,10 +25,10 @@ const onNodeClick = (node: TreeNodeType) => {
   Inertia.visit(
     route("app.dashboard", {
       folder: isExpanded.value ? node.id : props.parentId,
-    }),
+    }) as string,
     {
       method: Method.GET,
-      only: ["files"],
+      only: ["files", "folderId"],
     }
   );
 };
@@ -43,7 +44,11 @@ const onChildNodeExpand = (node: TreeNodeType) => {
 <template>
   <li>
     <button
-      class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+      class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group dark:text-white"
+      :class="{
+        'bg-gray-100 dark:bg-gray-700': isCurrentFolder,
+        'hover:bg-gray-100 dark:hover:bg-gray-500': !isCurrentFolder,
+      }"
       @click="() => onNodeClick(node)"
     >
       <svg

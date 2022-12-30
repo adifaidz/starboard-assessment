@@ -42,6 +42,10 @@ class FolderController extends Controller
         'parent_id' => $request->parentId,
         'owned_by' => Auth::user()->id,
       ]);
+
+      return redirect()->route('app.dashboard', [
+        'folder' => $request->parentId,
+      ]);
     }
 
     /**
