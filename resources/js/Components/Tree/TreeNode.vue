@@ -11,7 +11,7 @@ const props = defineProps({
   node: Object as PropType<TreeNodeType>,
 });
 const emit = defineEmits(["nodeExpanded"]);
-
+console.log("pageFolderId", pageFolderId);
 const isCurrentFolder = pageFolderId === props.node.id;
 const isExpanded = ref(isCurrentFolder);
 
@@ -19,21 +19,28 @@ if (isExpanded.value) {
   emit("nodeExpanded", props.node);
 }
 
-const onNodeClick = (node: TreeNodeType) => {
+const onNodeClick = () => {
+  console.log("onNodeIconClick");
   isExpanded.value = !isExpanded.value;
 
   Inertia.visit(
     route("app.dashboard", {
-      folder: isExpanded.value ? node.id : props.parentId,
+      folder: isExpanded.value ? props.node.id : props.parentId,
     }) as string,
     {
+      preserveState: true,
       method: Method.GET,
       only: ["files", "folderId"],
     }
   );
 };
 
-const onChildNodeExpand = (node: TreeNodeType) => {
+const onNodeIconClick = () => {
+  console.log("onNodeIconClick");
+  isExpanded.value = !isExpanded.value;
+};
+
+const onChildNodeExpand = () => {
   if (isExpanded.value) return;
 
   isExpanded.value = true;
@@ -49,7 +56,7 @@ const onChildNodeExpand = (node: TreeNodeType) => {
         'bg-gray-100 dark:bg-gray-700': isCurrentFolder,
         'hover:bg-gray-100 dark:hover:bg-gray-500': !isCurrentFolder,
       }"
-      @click="() => onNodeClick(node)"
+      @click.self="onNodeClick"
     >
       <svg
         v-if="isExpanded"
@@ -57,6 +64,7 @@ const onChildNodeExpand = (node: TreeNodeType) => {
         viewBox="0 0 24 24"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
+        @click.self="onNodeIconClick"
       >
         <path
           fillRule="evenodd"
@@ -70,6 +78,7 @@ const onChildNodeExpand = (node: TreeNodeType) => {
         viewBox="0 0 24 24"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
+        @click.self="onNodeIconClick"
       >
         <path
           fillRule="evenodd"
@@ -78,7 +87,10 @@ const onChildNodeExpand = (node: TreeNodeType) => {
         />
       </svg>
 
-      <span class="flex-1 ml-3 text-left whitespace-nowrap">
+      <span
+        class="flex-1 ml-3 text-left whitespace-nowrap"
+        @click.self="onNodeClick"
+      >
         {{ node.name }}
       </span>
     </button>

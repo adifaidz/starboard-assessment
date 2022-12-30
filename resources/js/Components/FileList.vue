@@ -2,6 +2,7 @@
 import { AppFile } from "@/interface";
 import { PropType, ref, inject } from "vue";
 import DangerButton from "@/Components/Ui/DangerButton.vue";
+import SecondaryButton from "@/Components/Ui/SecondaryButton.vue";
 import Modal from "@/Components/Ui/Modal.vue";
 import { useForm, usePage } from "@inertiajs/inertia-vue3";
 import { Inertia, Method } from "@inertiajs/inertia";
