@@ -5,30 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Folder\CreateRequest;
 use App\Http\Requests\Folder\UpdateRequest;
 use App\Models\Folder;
+use App\Models\File;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 class FolderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -43,31 +27,7 @@ class FolderController extends Controller
         'owned_by' => Auth::user()->id,
       ]);
 
-      return redirect()->route('app.dashboard', [
-        'folder' => $request->parentId,
-      ]);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Folder  $folder
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Folder $folder)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Folder  $folder
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Folder $folder)
-    {
-        //
+      return redirect()->back();
     }
 
     /**
@@ -79,7 +39,9 @@ class FolderController extends Controller
      */
     public function update(UpdateRequest $request, Folder $folder)
     {
-        //
+        $folder->update($request->validated());
+
+        return redirect()->back();
     }
 
     /**
@@ -90,6 +52,16 @@ class FolderController extends Controller
      */
     public function destroy(Folder $folder)
     {
-        //
+      $previousRouteName = Route::getRoutes()
+                        ->match(Request::create(
+                          URL::previous()
+                        ))
+                        ->getName();
+      $folder->delete();
+
+      if($previousRouteName == 'app.dashboard')
+        return redirect()->route('app.dashboard', ['folder' => $folder->parent]);
+      else
+        return redirect()->back();
     }
 }

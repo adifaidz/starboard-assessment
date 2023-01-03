@@ -25,7 +25,8 @@ class CreateRequest extends FormRequest
     {
         return [
           'files' => 'required|array',
-          'files.*' => 'required|file'
+          'files.*' => 'required|file',
+          'parentId' => 'required|string|uuid|exists:folders,id'
         ];
     }
 }

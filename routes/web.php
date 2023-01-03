@@ -29,13 +29,14 @@ Route::get('/', function () {
 });
 
 Route::group(['prefix' => 'app', 'middleware' => ['auth', 'verified']],function() {
+  Route::get('/search', [AppController::class, 'search'])->name('app.search');
   Route::get('/{folder?}', [AppController::class, 'index'])->name('app.dashboard');
 
   Route::post('/folders', [FolderController::class, 'store'])->name('app.folders.store');
-  Route::put('/folders', [FolderController::class, 'update'])->name('app.folders.update');
-  Route::delete('/folders', [FolderController::class, 'destroy'])->name('app.folders.destroy');
+  Route::put('/folders/{folder}', [FolderController::class, 'update'])->name('app.folders.update');
+  Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('app.folders.destroy');
 
-  Route::post('/{folder?}/files', [FileController::class, 'store'])->name('app.files.store');
+  Route::post('/files', [FileController::class, 'store'])->name('app.files.store');
   Route::put('/files/{file}', [FileController::class, 'update'])->name('app.files.update');
   Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('app.files.destroy');
 });

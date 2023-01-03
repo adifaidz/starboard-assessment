@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { AppFile, ModalType } from "@/interface";
-import { PropType, ref } from "vue";
+import { AppFolder, ModalType } from "@/interface";
+import { PropType, ref, inject } from "vue";
 import DangerButton from "@/Components/Ui/DangerButton.vue";
 import SecondaryButton from "@/Components/Ui/SecondaryButton.vue";
 import PrimaryButton from "@/Components/Ui/PrimaryButton.vue";
@@ -8,7 +8,7 @@ import InputError from "@/Components/Ui/InputError.vue";
 import InputLabel from "@/Components/Ui/InputLabel.vue";
 import TextInput from "@/Components/Ui/TextInput.vue";
 import Modal from "@/Components/Ui/Modal.vue";
-import { useForm } from "@inertiajs/inertia-vue3";
+import { Link, useForm } from "@inertiajs/inertia-vue3";
 import route from "@/../../vendor/tightenco/ziggy/src/js";
 
 const defaultModalStates = {
@@ -17,54 +17,60 @@ const defaultModalStates = {
 };
 
 const props = defineProps({
-  files: Array as PropType<Array<AppFile>>,
+  folders: Array as PropType<Array<AppFolder>>,
+  onUpdateSuccess: Function,
+  onDeleteSuccess: Function,
 });
 
-const currentSelectedFileId = ref(null as string);
+const currentSelectedFolderId = ref(null as string);
 const modalStates = ref(defaultModalStates);
 
-const updateFileForm = useForm({
+const updateFolderForm = useForm({
   name: null as string,
-  labels: [] as string[],
 });
-const deleteFileForm = useForm({});
+const deleteFolderForm = useForm({});
 
-const closeFileModal = () => {
+const closeFolderModal = () => {
   modalStates.value = defaultModalStates;
-  updateFileForm.reset();
-  deleteFileForm.reset();
+  updateFolderForm.reset();
+  deleteFolderForm.reset();
 };
 
-const openModal = (file: AppFile, type: ModalType) => {
-  currentSelectedFileId.value = file.id;
+const openModal = (folder: AppFolder, type: ModalType) => {
+  currentSelectedFolderId.value = folder.id;
 
   if (type === ModalType.UPDATE) {
-    updateFileForm.name = file.name;
-    updateFileForm.labels = file.labels;
+    updateFolderForm.name = folder.name;
   }
 
   modalStates.value = { ...defaultModalStates, [type]: true };
 };
 
-const updateFile = () => {
-  updateFileForm.put(
-    route("app.files.update", { file: currentSelectedFileId.value }) as string,
+const updateFolder = () => {
+  updateFolderForm.put(
+    route("app.folders.update", {
+      folder: currentSelectedFolderId.value,
+    }) as string,
     {
       preserveScroll: true,
       onSuccess: () => {
-        closeFileModal();
+        closeFolderModal();
+        if (props.onUpdateSuccess) props.onUpdateSuccess();
       },
     }
   );
 };
 
-const deleteFile = () => {
-  deleteFileForm.delete(
-    route("app.files.destroy", { file: currentSelectedFileId.value }) as string,
+const deleteFolder = () => {
+  deleteFolderForm.delete(
+    route("app.folders.destroy", {
+      folder: currentSelectedFolderId.value,
+    }) as string,
     {
       preserveScroll: true,
       onSuccess: () => {
-        closeFileModal();
+        closeFolderModal();
+        if (props.onDeleteSuccess) props.onDeleteSuccess();
       },
     }
   );
@@ -82,41 +88,38 @@ const deleteFile = () => {
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
         >
           <tr>
-            <th scope="col" class="py-3 px-6 w-5/12">File</th>
-            <th scope="col" class="py-3 px-6 w-2/12 text-center">Labels</th>
-            <th scope="col" class="py-3 px-6 w-2/12 text-center">
-              Uploaded on
-            </th>
-            <th scope="col" class="py-3 px-6 w-1/12 text-center">Size</th>
+            <th scope="col" class="py-3 px-6 w-1/2">Folder</th>
+            <th scope="col" class="py-3 px-6 w-2/12 text-center">Created on</th>
+            <th scope="col" class="py-3 px-6 w-1/12 text-center">Location</th>
             <th scope="col" class="py-3 px-6 w-2/12 text-center">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="file in files"
-            :key="file.id"
+            v-for="folder in folders"
+            :key="folder.id"
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             <th
               scope="row"
               class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
-              {{ file.name }}
+              {{ folder.name }}
             </th>
             <td class="py-4 px-6 text-center">
-              <li v-if="file.labels.length" v-for="label in file.labels">
-                {{ label }}
-              </li>
-              <span v-else> - </span>
+              {{ new Date(folder.created_at).toDateString() }}
             </td>
             <td class="py-4 px-6 text-center">
-              {{ new Date(file.created_at).toDateString() }}
+              <Link
+                :href="(route('app.dashboard', {folder: folder.parent.id}) as string)"
+                class="hover:underline hover:text-gray-300"
+                >{{ folder.parent.path }}</Link
+              >
             </td>
-            <td class="py-4 px-6 text-center">20MB</td>
             <td class="py-4 px-6 text-center">
               <PrimaryButton
                 class="rounded-r-none"
-                @click="() => openModal(file, ModalType.UPDATE)"
+                @click="() => openModal(folder, ModalType.UPDATE)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -131,7 +134,7 @@ const deleteFile = () => {
               </PrimaryButton>
               <DangerButton
                 class="rounded-l-none"
-                @click="() => openModal(file, ModalType.DELETE)"
+                @click="() => openModal(folder, ModalType.DELETE)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -146,60 +149,43 @@ const deleteFile = () => {
                   />
                 </svg>
               </DangerButton>
-              <Modal :show="modalStates.update" @close="closeFileModal">
+              <Modal :show="modalStates.update" @close="closeFolderModal">
                 <div class="p-6">
                   <div class="mt-6">
                     <InputLabel for="name" value="Name" class="sr-only" />
 
                     <TextInput
                       id="name"
-                      v-model="updateFileForm.name"
+                      v-model="updateFolderForm.name"
                       type="text"
                       class="mt-1 block w-full"
                       placeholder="Name"
-                      @keyup.enter="updateFile"
+                      @keyup.enter="updateFolder"
                     />
 
                     <InputError
-                      :message="updateFileForm.errors.name"
-                      class="mt-2"
-                    />
-                  </div>
-                  <div class="mt-6">
-                    <InputLabel for="labels" value="Labels" class="sr-only" />
-
-                    <TextInput
-                      id="labels"
-                      v-model="updateFileForm.labels"
-                      type="text"
-                      class="mt-1 block w-full"
-                      placeholder="Labels"
-                      @keyup.enter="updateFile"
-                    />
-
-                    <InputError
-                      :message="updateFileForm.errors.labels"
+                      :message="updateFolderForm.errors.name"
                       class="mt-2"
                     />
                   </div>
 
                   <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeFileModal">
+                    <SecondaryButton @click="closeFolderModal">
                       Cancel
                     </SecondaryButton>
 
                     <PrimaryButton
                       class="ml-3"
-                      :class="{ 'opacity-25': updateFileForm.processing }"
-                      :disabled="updateFileForm.processing"
-                      @click="updateFile"
+                      :class="{ 'opacity-25': updateFolderForm.processing }"
+                      :disabled="updateFolderForm.processing"
+                      @click="updateFolder"
                     >
                       Update
                     </PrimaryButton>
                   </div>
                 </div>
               </Modal>
-              <Modal :show="modalStates.delete" @close="closeFileModal">
+              <Modal :show="modalStates.delete" @close="closeFolderModal">
                 <div class="p-6">
                   <h2
                     class="text-lg font-medium text-gray-900 dark:text-gray-100"
@@ -208,15 +194,15 @@ const deleteFile = () => {
                   </h2>
 
                   <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeFileModal">
+                    <SecondaryButton @click="closeFolderModal">
                       Cancel
                     </SecondaryButton>
 
                     <DangerButton
                       class="ml-3"
-                      :class="{ 'opacity-25': deleteFileForm.processing }"
-                      :disabled="deleteFileForm.processing"
-                      @click="deleteFile"
+                      :class="{ 'opacity-25': deleteFolderForm.processing }"
+                      :disabled="deleteFolderForm.processing"
+                      @click="deleteFolder"
                     >
                       Delete File
                     </DangerButton>

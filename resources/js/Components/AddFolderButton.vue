@@ -7,36 +7,28 @@ import TextInput from "@/Components/Ui/TextInput.vue";
 import SecondaryButton from "@/Components/Ui/SecondaryButton.vue";
 import PrimaryButton from "@/Components/Ui/PrimaryButton.vue";
 import { Inertia, Method } from "@inertiajs/inertia";
-import { ref } from "vue";
+import { ref, useAttrs, computed } from "vue";
 import route from "@/../../vendor/tightenco/ziggy/src/js";
 
 const props = defineProps({
-  parentId: String,
+  folderId: String,
 });
+const attrs = useAttrs();
 
-const pageFolderId = usePage().props.value.folderId;
 const isModalOpen = ref(false);
 const nameInput = ref(null);
 
 const form = useForm({
   name: null as string,
-  parentId: pageFolderId as string,
+  parentId: null as string,
 });
 
-const partialReload = () => {
-  Inertia.visit(route("app.dashboard", { folder: pageFolderId }) as string, {
-    method: Method.GET,
-    preserveScroll: true,
-    only: ["folders", "files"],
-  });
-};
-
 const submit = () => {
+  form.parentId = props.folderId;
   form.post(route("app.folders.store") as string, {
     preserveScroll: true,
     onSuccess: () => {
       closeModal();
-      partialReload();
     },
     onError: () => nameInput.value.focus(),
     onFinish: () => form.reset(),
@@ -49,18 +41,13 @@ const openModal = () => {
 
 const closeModal = () => {
   isModalOpen.value = false;
-  form.reset();
 };
 </script>
 
 <template>
-  <button
-    @click="openModal"
-    type="button"
-    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-  >
+  <PrimaryButton v-bind="attrs" @click="openModal" type="button">
     Add Folder
-  </button>
+  </PrimaryButton>
   <Modal :show="isModalOpen" @close="closeModal">
     <div class="p-6">
       <div class="mt-6">
@@ -71,7 +58,7 @@ const closeModal = () => {
           ref="nameInput"
           v-model="form.name"
           type="text"
-          class="mt-1 block w-3/4"
+          class="mt-1 block w-full"
           placeholder="Name"
           @keyup.enter="submit"
         />
