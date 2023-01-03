@@ -7,10 +7,10 @@ use App\Http\Requests\File\UpdateRequest;
 use App\Models\File;
 use App\Models\Folder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
-
   /**
    * Store a newly created resource in storage.
    *
@@ -30,7 +30,7 @@ class FileController extends Controller
         'parent_id' => $parent->id,
       ]);
 
-      $uploadedFile->storeAs(Auth::user()->id, $file->hashed_name);
+      $uploadedFile->storeAs($file->owned_by, $file->hashed_name);
     }
 
     return redirect()->back();
@@ -62,5 +62,10 @@ class FileController extends Controller
     $file->delete();
 
     return redirect()->back();
+  }
+
+  public function download(File $file)
+  {
+    return Storage::download($file->realPath(), $file->name);
   }
 }

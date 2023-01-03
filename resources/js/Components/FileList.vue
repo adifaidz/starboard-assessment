@@ -8,7 +8,7 @@ import InputError from "@/Components/Ui/InputError.vue";
 import InputLabel from "@/Components/Ui/InputLabel.vue";
 import TextInput from "@/Components/Ui/TextInput.vue";
 import Modal from "@/Components/Ui/Modal.vue";
-import { useForm } from "@inertiajs/inertia-vue3";
+import { Link, useForm } from "@inertiajs/inertia-vue3";
 import route from "@/../../vendor/tightenco/ziggy/src/js";
 
 const defaultModalStates = {
@@ -101,7 +101,12 @@ const deleteFile = () => {
               scope="row"
               class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
-              {{ file.name }}
+              <a
+                target="_blank"
+                :href="route('app.files.download', {file: file.id}) as string"
+              >
+                {{ file.name }}
+              </a>
             </th>
             <td class="py-4 px-6 text-center">
               <li v-if="file.labels.length" v-for="label in file.labels">

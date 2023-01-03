@@ -28,7 +28,7 @@ class File extends Model
       parent::boot();
 
       static::deleting(function($file) {
-        Storage::disk('local')->delete($file->owner->id . '/' .$file->hashed_name);
+        Storage::delete($file->realPath());
       });
     }
 
@@ -45,5 +45,9 @@ class File extends Model
       return Attribute::make(
           get: fn () => $this->parent ? $this->parent->path . '/' . $this->name : $this->name,
       );
+    }
+
+    public function realPath() {
+      return $this->owner->id . '/' . $this->hashed_name;
     }
 }

@@ -39,6 +39,7 @@ Route::group(['prefix' => 'app', 'middleware' => ['auth', 'verified']],function(
   Route::post('/files', [FileController::class, 'store'])->name('app.files.store');
   Route::put('/files/{file}', [FileController::class, 'update'])->name('app.files.update');
   Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('app.files.destroy');
+  Route::get('/files/{file}/download', [FileController::class, 'download'])->name('app.files.download');
 });
 
 Route::middleware('auth')->group(function () {
