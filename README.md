@@ -6,6 +6,8 @@
 
 This project uses [Laravel 9](https://laravel.com/docs/8.x), [InertiaJS](https://inertiajs.com/), [Vue](https://vuejs.org/) and [Tailwind](https://tailwindcss.com/). All the auths related stuff had been scaffolded using L[aravel Breeze](https://laravel.com/docs/8.x/starter-kits#laravel-breeze).
 
+**For a demo, can refer to this video that I've recorded : https://share.vidyard.com/watch/4AxK3Lwt2tkSedpgZyWkRi?**
+
 ## First time setup
 
 - Run `composer install`
