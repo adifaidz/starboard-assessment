@@ -1,5 +1,3 @@
-## Setting up
-
 # README
 
 ## Introduction
