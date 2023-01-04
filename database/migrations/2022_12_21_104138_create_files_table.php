@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('hashed_name');
+            $table->string('size');
             $table->json('labels');
             $table->foreignUuid('parent_id')->nullable()->references('id')->on('folders');
             $table->foreignId('owned_by')->references('id')->on('users');

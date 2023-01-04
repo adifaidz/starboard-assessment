@@ -29,6 +29,7 @@ class FileController extends Controller
         'name' => $uploadedFile->getClientOriginalName(),
         'owned_by' => Auth::user()->id,
         'hashed_name' => $uploadedFile->hashName(),
+        'size' => ReadableSize($uploadedFile->getSize(), false),
         'parent_id' => $parent->id,
       ]);
 

@@ -2,6 +2,7 @@ import "./bootstrap";
 import "../css/app.css";
 import "flowbite/dist/flowbite";
 import "floating-vue/dist/style.css";
+import "vue-multiselect/dist/vue-multiselect.css";
 
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/inertia-vue3";

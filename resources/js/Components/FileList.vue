@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { AppFile, ModalType } from "@/interface";
-import { PropType, ref } from "vue";
+import { AppFile, ModalType, SelectLabel } from "@/interface";
+import { PropType, ref, computed } from "vue";
+import { useForm } from "@inertiajs/inertia-vue3";
+import Multiselect from "vue-multiselect";
 import DangerButton from "@/Components/Ui/DangerButton.vue";
 import SecondaryButton from "@/Components/Ui/SecondaryButton.vue";
 import PrimaryButton from "@/Components/Ui/PrimaryButton.vue";
@@ -8,7 +10,6 @@ import InputError from "@/Components/Ui/InputError.vue";
 import InputLabel from "@/Components/Ui/InputLabel.vue";
 import TextInput from "@/Components/Ui/TextInput.vue";
 import Modal from "@/Components/Ui/Modal.vue";
-import { Link, useForm } from "@inertiajs/inertia-vue3";
 import route from "@/../../vendor/tightenco/ziggy/src/js";
 
 const defaultModalStates = {
@@ -23,10 +24,14 @@ const props = defineProps({
 const currentSelectedFileId = ref(null as string);
 const modalStates = ref(defaultModalStates);
 
+const labelOptions = ref([] as SelectLabel[]);
+const labelValues = ref([] as SelectLabel[]);
+
 const updateFileForm = useForm({
   name: null as string,
   labels: [] as string[],
 });
+
 const deleteFileForm = useForm({});
 
 const closeFileModal = () => {
@@ -35,24 +40,43 @@ const closeFileModal = () => {
   deleteFileForm.reset();
 };
 
+const toSelectLabel = (label) => ({
+  name: label,
+  code: label,
+});
+const toSelectLabels = (labels: string[]) => labels.map(toSelectLabel);
+
 const openModal = (file: AppFile, type: ModalType) => {
   currentSelectedFileId.value = file.id;
 
   if (type === ModalType.UPDATE) {
     updateFileForm.name = file.name;
-    updateFileForm.labels = file.labels;
+
+    const selectLabels = toSelectLabels(file.labels);
+    labelOptions.value = [...selectLabels];
+    labelValues.value = [...selectLabels];
   }
 
   modalStates.value = { ...defaultModalStates, [type]: true };
 };
 
+const addLabel = (newLabel: string) => {
+  const selectLabel = toSelectLabel(newLabel);
+  labelOptions.value.push(selectLabel);
+  labelValues.value.push(selectLabel);
+};
+
 const updateFile = () => {
+  updateFileForm.labels = labelValues.value.map((label) => label.name);
   updateFileForm.put(
     route("app.files.update", { file: currentSelectedFileId.value }) as string,
     {
       preserveScroll: true,
       onSuccess: () => {
         closeFileModal();
+      },
+      onFinish: () => {
+        updateFileForm.reset();
       },
     }
   );
@@ -77,13 +101,15 @@ const deleteFile = () => {
   >
     <slot name="header" />
     <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
-      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <table
+        class="table-fixed w-full text-sm text-left text-gray-500 dark:text-gray-400"
+      >
         <thead
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
         >
           <tr>
-            <th scope="col" class="py-3 px-6 w-5/12">File</th>
-            <th scope="col" class="py-3 px-6 w-2/12 text-center">Labels</th>
+            <th scope="col" class="py-3 px-6 w-4/12">File</th>
+            <th scope="col" class="py-3 px-6 w-3/12 text-center">Labels</th>
             <th scope="col" class="py-3 px-6 w-2/12 text-center">
               Uploaded on
             </th>
@@ -108,16 +134,21 @@ const deleteFile = () => {
                 {{ file.name }}
               </a>
             </th>
-            <td class="py-4 px-6 text-center">
-              <li v-if="file.labels.length" v-for="label in file.labels">
-                {{ label }}
-              </li>
+            <td class="py-4 px-6 space-x-2 space-y-2">
+              <template v-if="file.labels.length">
+                <div
+                  v-for="label in file.labels"
+                  class="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-green-500 text-white rounded-full"
+                >
+                  {{ label }}
+                </div>
+              </template>
               <span v-else> - </span>
             </td>
             <td class="py-4 px-6 text-center">
               {{ new Date(file.created_at).toDateString() }}
             </td>
-            <td class="py-4 px-6 text-center">20MB</td>
+            <td class="py-4 px-6 text-center">{{ file.size }}</td>
             <td class="py-4 px-6 text-center">
               <PrimaryButton
                 class="rounded-r-none"
@@ -173,13 +204,17 @@ const deleteFile = () => {
                   <div class="mt-6">
                     <InputLabel for="labels" value="Labels" class="sr-only" />
 
-                    <TextInput
-                      id="labels"
-                      v-model="updateFileForm.labels"
-                      type="text"
-                      class="mt-1 block w-full"
-                      placeholder="Labels"
-                      @keyup.enter="updateFile"
+                    <Multiselect
+                      class="vue-multiselect border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm text-sm mt-1 block w-full"
+                      v-model="labelValues"
+                      tag-placeholder="Add this label"
+                      placeholder="Add a label"
+                      label="name"
+                      track-by="code"
+                      :options="labelOptions"
+                      :multiple="true"
+                      :taggable="true"
+                      @tag="addLabel"
                     />
 
                     <InputError
@@ -235,3 +270,116 @@ const deleteFile = () => {
     </div>
   </div>
 </template>
+
+<style lang="css" scoped>
+.vue-multiselect :deep(.multiselect__tags) {
+  /* border-gray-300 */
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity));
+
+  /* rounded-md */
+  border-radius: 0.375rem /* 6px */;
+
+  /* shadow-sm */
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+
+  /* text-sm */
+  font-size: 0.875rem /* 14px */;
+  line-height: 1.25rem /* 20px */;
+
+  /* mt-1 */
+  margin-top: 0.25rem /* 4px */;
+
+  /* block */
+  display: block;
+
+  /* w-full */
+  width: 100%;
+}
+
+.vue-multiselect :deep(.multiselect__tags:focus) {
+  /* focus:border-indigo-500 */
+  --tw-border-opacity: 1;
+  border-color: rgb(104 117 245 / var(--tw-border-opacity));
+
+  /* focus:ring-indigo-500 */
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(104 117 245 / var(--tw-ring-opacity));
+}
+
+.vue-multiselect :deep(.multiselect__input) {
+  /* border-gray-300 */
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity));
+
+  /* rounded-md */
+  border-radius: 0.375rem /* 6px */;
+
+  /* shadow-sm */
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+
+  /* text-sm */
+  font-size: 0.875rem /* 14px */;
+  line-height: 1.25rem /* 20px */;
+
+  /* mt-1 */
+  margin-top: 0.25rem /* 4px */;
+
+  /* block */
+  display: block;
+
+  /* w-full */
+  width: 100%;
+}
+
+.vue-multiselect :deep(.multiselect__input:focus) {
+  outline: none;
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .vue-multiselect :deep(.multiselect__tags) {
+    /* dark:border-gray-700 */
+    --tw-border-opacity: 1;
+    border-color: rgb(55 65 81 / var(--tw-border-opacity));
+
+    /* dark:bg-gray-900 */
+    --tw-bg-opacity: 1;
+    background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+
+    /* dark:text-gray-300 */
+    --tw-text-opacity: 1;
+    color: rgb(209 213 219 / var(--tw-text-opacity));
+  }
+
+  .vue-multiselect :deep(.multiselect__tags:focus) {
+    /* dark:focus:border-indigo-600 */
+    --tw-border-opacity: 1;
+    border-color: rgb(88 80 236 / var(--tw-border-opacity));
+
+    /* dark:focus:ring-indigo-600 */
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgb(88 80 236 / var(--tw-ring-opacity));
+  }
+
+  .vue-multiselect :deep(.multiselect__input) {
+    /* dark:border-gray-700 */
+    --tw-border-opacity: 1;
+    border-color: rgb(55 65 81 / var(--tw-border-opacity));
+
+    /* dark:bg-gray-900 */
+    --tw-bg-opacity: 1;
+    background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+
+    /* dark:text-gray-300 */
+    --tw-text-opacity: 1;
+    color: rgb(209 213 219 / var(--tw-text-opacity));
+  }
+}
+</style>

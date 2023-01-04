@@ -21,7 +21,7 @@ class File extends Model
     ];
 
     protected $fillable = [
-      'name', 'hashed_name', 'owned_by', 'parent_id'
+      'name', 'labels','hashed_name', 'size', 'owned_by', 'parent_id'
     ];
 
     protected static function boot() {

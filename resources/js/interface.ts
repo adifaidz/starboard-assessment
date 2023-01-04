@@ -29,3 +29,8 @@ export enum ModalType {
   UPDATE = "update",
   DELETE = "delete",
 }
+
+export interface SelectLabel {
+  name: string;
+  code: string;
+}
