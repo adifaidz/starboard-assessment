@@ -29,7 +29,7 @@ class Folder extends Model
   }
 
   public function owner() {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(User::class, 'owned_by');
   }
 
   public function parent() {

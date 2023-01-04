@@ -43,10 +43,10 @@ class User extends Authenticatable
     ];
 
     public function files() {
-        return $this->hasMany(File::class);
+        return $this->hasMany(File::class, 'owned_by');
     }
 
     public function folders() {
-        return $this->hasMany(Folder::class);
+        return $this->hasMany(Folder::class, 'owned_by');
     }
 }
