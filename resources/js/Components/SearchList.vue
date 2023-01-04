@@ -12,7 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="flex flex-col p-6">
+  <div class="flex flex-col p-6 gap-20">
     <FolderList v-if="folders && folders.length" :folders="folders" />
     <FileList v-if="files && files.length" :files="files" />
   </div>

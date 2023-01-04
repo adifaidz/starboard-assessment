@@ -18,6 +18,9 @@ class AppController extends Controller
      */
     public function index(Folder $folder = null)
     {
+      $this->authorize('viewAny', Folder::class);
+      $this->authorize('viewAny', File::class);
+
       $rootFolder = Folder::where('parent_id', null)->where('owned_by', Auth::user()->id)->first();
       $folderNodes = Folder::where('parent_id', $rootFolder->id)
                   ->with('nodes')
@@ -33,12 +36,15 @@ class AppController extends Controller
     }
 
     public function search(Request $request) {
+      $this->authorize('viewAny', Folder::class);
+      $this->authorize('viewAny', File::class);
+
       $validator = Validator::make($request->all(), [
         'q' => 'required|string',
       ]);
 
       if ($validator->fails()) {
-        return redirect()->route('app.dashboard');
+        return redirect()->back();
       }
 
       $validated = $validator->validated();

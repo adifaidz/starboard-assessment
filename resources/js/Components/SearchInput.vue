@@ -11,7 +11,9 @@ const form = useForm({
 });
 
 const onSearch = () => {
-  form.get(route("app.search") as string);
+  if (!form.q) return;
+
+  form.get(route("app.search") as string, {});
 };
 </script>
 

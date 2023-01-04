@@ -21,6 +21,8 @@ class FolderController extends Controller
      */
     public function store(CreateRequest $request)
     {
+      $this->authorize('create', Folder::class);
+
       Folder::create([
         'name' => $request->name,
         'parent_id' => $request->parentId,
@@ -39,9 +41,11 @@ class FolderController extends Controller
      */
     public function update(UpdateRequest $request, Folder $folder)
     {
-        $folder->update($request->validated());
+      $this->authorize('update', $folder);
 
-        return redirect()->back();
+      $folder->update($request->validated());
+
+      return redirect()->back();
     }
 
     /**
@@ -52,6 +56,8 @@ class FolderController extends Controller
      */
     public function destroy(Folder $folder)
     {
+      $this->authorize('delete', $folder);
+
       $previousRouteName = Route::getRoutes()
                         ->match(Request::create(
                           URL::previous()

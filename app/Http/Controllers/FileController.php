@@ -19,6 +19,8 @@ class FileController extends Controller
    */
   public function store(CreateRequest $request)
   {
+    $this->authorize('create', File::class);
+
     $uploadedFiles = $request->file('files');
     $parent = Folder::find($request->parentId);
 
@@ -45,6 +47,8 @@ class FileController extends Controller
    */
   public function update(UpdateRequest $request, File $file)
   {
+    $this->authorize('update', $file);
+
     $file->update($request->validated());
 
     return redirect()->back();
@@ -58,6 +62,7 @@ class FileController extends Controller
    */
   public function destroy(File $file)
   {
+    $this->authorize('delete', $file);
 
     $file->delete();
 
@@ -66,6 +71,8 @@ class FileController extends Controller
 
   public function download(File $file)
   {
+    $this->authorize('view', $file);
+
     return Storage::download($file->realPath(), $file->name);
   }
 }
